@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MEME OS</title>
+    <!-- Lazy Dog style font -->
+    <link href="https://fonts.googleapis.com/css2?family=Schoolbell&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #000;
+            color: #ff0000;
+            font-family: 'Schoolbell', cursive;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Flicker Animation */
+        @keyframes flicker {
+            0% { opacity: 0.9; }
+            5% { opacity: 0.5; }
+            10% { opacity: 0.9; }
+            100% { opacity: 1; }
+        }
+
+        .container { text-align: center; width: 100%; animation: flicker 4s infinite; }
+        .page { display: none; }
+        .active { display: flex; flex-direction: column; align-items: center; }
+
+        h1 { 
+            font-size: 5rem; 
+            margin-bottom: 20px; 
+            text-shadow: 0 0 20px #ff0000, 5px 5px 0px #4a0000;
+        }
+        
+        .menu-btn {
+            background: #110000;
+            border: 5px solid #ff0000;
+            color: #ff0000;
+            padding: 20px 40px;
+            font-size: 3rem;
+            font-family: 'Schoolbell', cursive;
+            cursor: pointer;
+            margin: 15px;
+            box-shadow: 10px 10px 0px #660000;
+            transition: 0.05s;
+        }
+
+        .menu-btn:active {
+            box-shadow: 0px 0px 0px #ff0000;
+            transform: translate(10px, 10px);
+        }
+
+        /* THE PLAY SCREEN - PURE VOID */
+        #player {
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+            position: absolute;
+            top: 0; left: 0;
+        }
+
+        .big-trigger {
+            background: none;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            outline: none;
+        }
+
+        /* The dynamic image */
+        .big-trigger img {
+            width: 85vw;
+            max-width: 500px;
+            filter: drop-shadow(0 0 30px #ff0000);
+            transition: transform 0.05s;
+            border-radius: 15px; /* Optional slight curve */
+        }
+
+        .big-trigger:active img {
+            transform: scale(0.85);
+            filter: brightness(2) drop-shadow(0 0 60px #ff0000);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <!-- HOME PAGE -->
+        <div id="home" class="page active">
+            <h1>MEME SOUNDBOARD</h1>
+            <button class="menu-btn" onclick="goTo('list')">START</button>
+        </div>
+
+        <!-- LIST PAGE -->
+        <div id="list" class="page">
+            <h1>SOUNDS</h1>
+            <button class="menu-btn" onclick="setMeme('clash')">CLASH</button>
+            <button class="menu-btn" onclick="setMeme('bruh')">FAHHH</button>
+            <button class="menu-btn" onclick="setMeme('scream')">SCREAM</button>
+        </div>
+
+        <!-- PLAY PAGE (JUST THE VOID AND DYNAMIC IMAGE) -->
+        <div id="player" class="page">
+            <button class="big-trigger" onclick="blastSound()">
+                <!-- This 'src' will be replaced by JavaScript! -->
+                <img id="dynamic-img" src="" alt="LOADING...">
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        let selectedAudio = "";
+
+        function goTo(id) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        // When you pick a sound, set the URL and load it
+        function setMeme(name) {
+            window.location.hash = name;
+            loadFromHash();
+        }
+
+        // The logic that swaps images/sounds based on the URL
+        function loadFromHash() {
+            const hash = window.location.hash.replace('#', '');
+            if (!hash) {
+                goTo('home');
+            } else if (hash === 'list') {
+                goTo('list');
+            } else {
+                // 1. Swap the Sound File
+                selectedAudio = hash + '.mp3';
+                
+                // 2. Swap the Image File
+                // This assumes your image is a .png. If it's a .jpg, change 'png' to 'jpg'.
+                const imageFile = hash + '.png'; 
+                document.getElementById('dynamic-img').src = imageFile;
+
+                // 3. Go to the pure void play screen
+                goTo('player');
+            }
+        }
+
+        function blastSound() {
+            if (selectedAudio) {
+                const sfx = new Audio(selectedAudio);
+                // Browsers often block autoplay on NFC/Link load,
+                // but tapping the huge image always works.
+                sfx.play().catch(e => console.log("First tap unlocks sound."));
+            }
+        }
+
+        // Handle URL changes (NFC taps)
+        window.onhashchange = loadFromHash;
+        window.onload = loadFromHash;
+    </script>
+</body>
+</html>
